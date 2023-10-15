@@ -1,6 +1,10 @@
 <template>
-  <div class="flex items-center justify-center">
-    <div class="flex flex-col items-center rounded-xl shadow-xl p-6">
+  <div
+    class="flex items-center justify-center relative w-[600px] rounded-xl shadow-xl h-[250px]"
+  >
+    <div
+      class="flex flex-col items-center absolute top-0 left-0 z-0 w-full p-6"
+    >
       <p class="text-5xl font-extrabold p-6">Dodaj nowe zdjęcie</p>
       <div class="flex justify-center">
         <input
@@ -38,6 +42,14 @@
         </button>
       </div>
     </div>
+    <Transition name="fade">
+      <div
+        class="absolute top-0 left-0 z-20 w-full h-full bg-black rounded-xl shadow-xl bg-opacity-60 flex justify-center items-center"
+        v-if="status == 'ok'"
+      >
+        <img src="../../assets/checked.png" alt="" width="80" />
+      </div>
+    </Transition>
   </div>
 </template>
 <script lang="ts" setup>
@@ -49,7 +61,7 @@ import PrevArrow from "../../assets/prevArrow.vue";
 import NextArrow from "../../assets/nextArrow.vue";
 const file = ref<HTMLInputElement | null>(null);
 const loading = ref<boolean>(false);
-const status = ref<{ status: "ok" | "error" } | null>(null);
+const status = ref<"ok" | "error" | null>(null);
 const active = ref<boolean>(false);
 
 const handleFileInputChange = () => {
@@ -70,12 +82,27 @@ const uploadImage = async () => {
   loading.value = false;
   if (res.status == 200) {
     // handle ok
+    status.value = "ok";
     console.log(data);
   } else {
     // handle error
   }
+  setTimeout(() => {
+    status.value = null;
+  }, 2000);
 };
 const props = defineProps<{
   handleNextStep: (nextStep: string) => void;
 }>();
 </script>
+<style>
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity 0.8s ease;
+}
+
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+</style>
