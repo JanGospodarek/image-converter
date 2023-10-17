@@ -1,14 +1,22 @@
-import { createStore } from 'vuex'
+import { Store, createStore } from "vuex";
+import { InjectionKey } from "vue";
 
-export default createStore({
+export interface State {
+  id: string;
+}
+
+export const key: InjectionKey<Store<State>> = Symbol();
+
+export default createStore<State>({
   state: {
+    id: "",
   },
-  getters: {
-  },
+  getters: {},
   mutations: {
+    setId(state, payload: string) {
+      state.id = payload;
+    },
   },
-  actions: {
-  },
-  modules: {
-  }
-})
+  actions: {},
+  modules: {},
+});

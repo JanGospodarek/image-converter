@@ -11,16 +11,19 @@
           type="file"
           ref="file"
           name="file"
-          class="file-input w-full max-w-xs"
-          @change="handleFileInputChange()"
+          :class="`file-input w-full max-w-xs ${extError && 'bg-error'}`"
+          @change="handleFileInputChange($event)"
         />
         <button
-          :class="`btn btn-square btn-success btn-outline  ${
+          :class="`btn btn-square btn-success btn-outline ml-4  ${
             (!active || loading) && 'btn-disabled'
           }`"
           @click="uploadImage()"
         >
-          <LoadingSpinner v-if="loading" />
+          <span
+            className="loading loading-dots loading-lg"
+            v-if="loading"
+          ></span>
 
           <SendButton v-if="!loading" />
         </button>
@@ -50,23 +53,60 @@
         <img src="../../assets/checked.png" alt="" width="80" />
       </div>
     </Transition>
+    <Transition name="fade">
+      <div
+        class="absolute top-0 left-0 z-20 w-full h-full bg-black rounded-xl shadow-xl bg-opacity-60 flex flex-col justify-center items-center"
+        v-if="status == 'error'"
+      >
+        <img src="../../assets/error.png" alt="" width="80" />
+        <p class="text-white">{{ errorMsg }}</p>
+      </div>
+    </Transition>
   </div>
 </template>
 <script lang="ts" setup>
-import { defineProps, ref } from "vue";
+import { defineProps, ref, onMounted } from "vue";
+import { useStore } from "vuex";
+import { key } from "../../store";
+
 import convertBase64 from "../../hooks/convertToBase";
 import SendButton from "../../assets/sendButton.vue";
-import LoadingSpinner from "../../assets/loadingSpinner.vue";
 import PrevArrow from "../../assets/prevArrow.vue";
 import NextArrow from "../../assets/nextArrow.vue";
+const store = useStore(key);
+
 const file = ref<HTMLInputElement | null>(null);
 const loading = ref<boolean>(false);
 const status = ref<"ok" | "error" | null>(null);
+const extError = ref<boolean>(false);
+const errorMsg = ref<string | null>(null);
 const active = ref<boolean>(false);
+const acceptableExts = ["png", "jpg", "jpeg"];
 
-const handleFileInputChange = () => {
-  if (file.value?.files && file.value.files[0] !== undefined)
+onMounted(async () => {
+  const res = await fetch("http://127.0.0.1:8000/init", {
+    method: "GET",
+  });
+  const data = await res.json();
+  console.log(data.id);
+
+  if (res.status == 200) store.commit("setId", data.id);
+});
+
+const handleFileInputChange = (e: Event) => {
+  if (!file.value?.files) return;
+
+  const ext = file.value.files[0].name.split(".").pop() as string;
+
+  if (!acceptableExts.includes(ext)) {
+    const target = e.target as HTMLInputElement;
+    target.value = "";
+    active.value = false;
+    extError.value = true;
+  } else {
     active.value = true;
+    extError.value = false;
+  }
 };
 
 const uploadImage = async () => {
@@ -75,17 +115,16 @@ const uploadImage = async () => {
   const base64 = await convertBase64(file.value.files[0]);
   const res = await fetch("http://127.0.0.1:8000/upload_image", {
     method: "POST",
-    body: JSON.stringify({ image64: base64 }),
+    body: JSON.stringify({ image64: base64, id: store.state.id }),
     headers: { "Content-Type": "application/json" },
   });
   const data = await res.json();
   loading.value = false;
   if (res.status == 200) {
-    // handle ok
     status.value = "ok";
-    console.log(data);
   } else {
-    // handle error
+    status.value = "error";
+    errorMsg.value = data.message;
   }
   setTimeout(() => {
     status.value = null;
