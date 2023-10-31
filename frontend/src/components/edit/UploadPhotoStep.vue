@@ -39,6 +39,7 @@
         <button
           class="btn btn-accent btn-outline"
           @click="props.handleNextStep('upload')"
+          :disabled="!activeBtn"
         >
           Dalej
           <NextArrow />
@@ -78,20 +79,11 @@ const store = useStore(key);
 const file = ref<HTMLInputElement | null>(null);
 const loading = ref<boolean>(false);
 const status = ref<"ok" | "error" | null>(null);
+const activeBtn = ref<boolean>(false);
 const extError = ref<boolean>(false);
 const errorMsg = ref<string | null>(null);
 const active = ref<boolean>(false);
 const acceptableExts = ["png", "jpg", "jpeg"];
-
-onMounted(async () => {
-  const res = await fetch("http://127.0.0.1:8000/init", {
-    method: "GET",
-  });
-  const data = await res.json();
-  console.log(data.id);
-
-  if (res.status == 200) store.commit("setId", data.id);
-});
 
 const handleFileInputChange = (e: Event) => {
   if (!file.value?.files) return;
@@ -112,20 +104,26 @@ const handleFileInputChange = (e: Event) => {
 const uploadImage = async () => {
   if (!file.value?.files || file.value.files[0] == undefined) return;
   loading.value = true;
-  const base64 = await convertBase64(file.value.files[0]);
-  const res = await fetch("http://127.0.0.1:8000/upload_image", {
-    method: "POST",
-    body: JSON.stringify({ image64: base64, id: store.state.id }),
-    headers: { "Content-Type": "application/json" },
-  });
-  const data = await res.json();
-  loading.value = false;
-  if (res.status == 200) {
-    status.value = "ok";
-  } else {
+  try {
+    const base64 = await convertBase64(file.value.files[0]);
+    const res = await fetch("http://127.0.0.1:8000/upload_image", {
+      method: "POST",
+      body: JSON.stringify({ image64: base64, id: store.state.id }),
+      headers: { "Content-Type": "application/json" },
+    });
+    const data = await res.json();
+    loading.value = false;
+    if (res.status == 200) {
+      status.value = "ok";
+      activeBtn.value = true;
+    } else {
+      throw new Error(data.message);
+    }
+  } catch (error) {
     status.value = "error";
-    errorMsg.value = data.message;
+    errorMsg.value = error as string;
   }
+
   setTimeout(() => {
     status.value = null;
   }, 2000);
