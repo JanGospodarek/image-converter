@@ -38,7 +38,7 @@
         </button>
         <button
           class="btn btn-accent btn-outline"
-          @click="props.handleNextStep('upload')"
+          @click="props.handleNextStep('edit')"
           :disabled="!activeBtn"
         >
           Dalej
