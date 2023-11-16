@@ -1,13 +1,13 @@
 <template>
   <div class="w-screen h-screen flex items-center justify-center">
-    <!-- <TitleStep v-if="step === 'hello'" :handleNextStep="handleNextStep" />
+    <TitleStep v-if="step === 'hello'" :handleNextStep="handleNextStep" />
 
     <UploadPhotoStep
       v-if="step === 'upload'"
       :handleNextStep="handleNextStep"
-    /> -->
-    <!-- <EditPhotoStep v-if="step === 'edit'" /> -->
-    <EditPhotoStep />
+    />
+
+    <EditPhotoStep v-if="step === 'edit'" />
   </div>
 </template>
 
@@ -19,6 +19,8 @@ import TitleStep from "../components/edit/TitleStep.vue";
 // eslint-disable-next-line
 // @ts-ignore
 import UploadPhotoStep from "../components/edit/UploadPhotoStep.vue";
+// eslint-disable-next-line
+// @ts-ignore
 import EditPhotoStep from "../components/edit/EditPhotoStep.vue";
 
 const step = ref<string>("hello");
