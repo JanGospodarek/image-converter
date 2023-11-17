@@ -1,6 +1,8 @@
 <template>
   <div class="w-[900px] rounded-xl shadow-xl h-[600px] grid grid-cols-5">
-    <div class="h-[500px] bg-base-300 my-auto col-span-3 ml-4"></div>
+    <div class="h-[500px] bg-base-300 my-auto col-span-3 ml-4">
+      <img :src="imgFilterSrc" alt="ddd" />
+    </div>
     <div class="px-4 pb-8 grid grid-rows-2 col-span-2">
       <div class="flex flex-col items-center">
         <input
@@ -39,14 +41,42 @@
         </div>
       </div>
       <div class="flex flex-col items-center">
-        <div class="rounded-xl border-2 p-3 mt-4 mx-auto">
+        <div class="p-3 mt-4 mx-auto">
           <p class="text-xl text-center pb-1">Filtr</p>
-          <div class="flex justify-around gap-4">
-            <button class="btn btn-sm btn-outline btn-primary">ascii</button>
-            <button class="btn btn-sm btn-outline btn-primary">emoji</button>
+          <div class="flex flex-col">
+            <div class="flex justify-around gap-4">
+              <button
+                class="btn btn-sm btn-outline btn-primary"
+                @click="setFilterName('pixel')"
+              >
+                pixels
+              </button>
+              <button class="btn btn-sm btn-outline btn-primary">emoji</button>
+            </div>
+
+            <div
+              v-if="filter === 'pixel'"
+              class="flex flex-col items-center gap-2 mt-2"
+            >
+              <p>Pixel size ({{ pixelsAmount }})</p>
+              <input
+                type="range"
+                min="15"
+                max="60"
+                step="5"
+                class="range range-sm"
+                v-model="pixelsAmount"
+              />
+              <button
+                class="btn btn-sm btn-info"
+                @click="handleSetFilter('pixel_art')"
+              >
+                Render
+              </button>
+            </div>
           </div>
         </div>
-        <button class="btn btn-success mt-10">Wyślij!</button>
+        <button class="btn btn-success">Wyślij!</button>
       </div>
     </div>
   </div>
@@ -54,9 +84,45 @@
 
 <script lang="ts" setup>
 import { ref } from "vue";
+import { useStore } from "vuex";
+import { key } from "../../store";
 const tagName = ref<string>("");
 const tagInputError = ref<boolean>(false);
 const tags = ref<string[]>([]);
+const filter = ref<string>("");
+const pixelsAmount = ref<number>(20);
+const store = useStore(key);
+const imgFilterSrc = ref<string>("");
+const setFilterName = (filterName: string) => (filter.value = filterName);
+
+const handleSetFilter = async (filterName: string) => {
+  try {
+    const res = await fetch(`http://127.0.0.1:8000/convert/${filterName}`, {
+      method: "POST",
+      body: JSON.stringify({
+        name: store.state.id,
+        pixels: pixelsAmount.value,
+      }),
+      headers: { "Content-Type": "application/json" },
+    });
+    const data = await res.json();
+
+    if (res.status == 200) {
+      const imageBase64 = "data:image/png;base64," + data.imageData;
+      imgFilterSrc.value = imageBase64;
+      // const res = await fetch("http://127.0.0.1:8000/download_image", {
+      //   method: "POST",
+      //   body: JSON.stringify({
+      //     image: store.state.id,
+      //   }),
+      //   headers: { "Content-Type": "application/json" },
+      // });
+      // const data = await res.json();
+    }
+  } catch (error) {
+    console.log(error);
+  }
+};
 
 const handleTagAdd = () => {
   tagInputError.value = false;
