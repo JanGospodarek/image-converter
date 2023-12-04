@@ -17,7 +17,7 @@ mongo.init_app(app)
 # routes
 api.add_resource(Initiate,'/init')
 api.add_resource(Image,'/upload_image')
-api.add_resource(ConvertPixelArt,'/convert/pixel_art')
+api.add_resource(ConvertPixelArt,'/convert')
 api.add_resource(SendImage,'/download_image')
 
 
