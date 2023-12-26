@@ -19,7 +19,7 @@ class Image(Resource):
             imagesCollection=mongo.db['images']
             print(fileName)
             if imagesCollection.count_documents({"name":fileName})==0:
-                imagesCollection.insert_one({"name":fileName,"tags":[]})
+                imagesCollection.insert_one({"name":fileName,"tags":[],"title":""})
             image_data = bytes(image_data, encoding="ascii")
 
             with open(f'./data/stored/{fileName}.png', 'wb') as fh:

@@ -1,13 +1,19 @@
 <template>
   <div class="w-screen h-screen flex items-center justify-center">
-    <TitleStep v-if="step === 'hello'" :handleNextStep="handleNextStep" />
+    <TitleStep
+      v-if="step === 'hello'"
+      :handleNextStep="handleNextStep"
+      :setError="setErrorMsg"
+    />
 
     <UploadPhotoStep
       v-if="step === 'upload'"
       :handleNextStep="handleNextStep"
     />
 
-    <EditPhotoStep v-if="step === 'edit'" />
+    <EditPhotoStep v-if="step === 'edit'" :setError="setErrorMsg" />
+
+    <ErrorAlert v-if="errorMsg !== null" :errorMsg="errorMsg" />
   </div>
 </template>
 
@@ -22,9 +28,14 @@ import UploadPhotoStep from "../components/edit/UploadPhotoStep.vue";
 // eslint-disable-next-line
 // @ts-ignore
 import EditPhotoStep from "../components/edit/EditPhotoStep.vue";
-
+// eslint-disable-next-line
+// @ts-ignore
+import ErrorAlert from "../components/error/ErrorAlert.vue";
 const step = ref<string>("hello");
 const handleNextStep = (nextStep: string) => {
   step.value = nextStep;
 };
+const errorMsg = ref<string | null>(null);
+
+const setErrorMsg = (msg: string | null) => (errorMsg.value = msg);
 </script>
