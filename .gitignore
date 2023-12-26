@@ -1,2 +1,4 @@
 node_modules
 .env.local
+backend/data/stored/
+backend/data/temp/

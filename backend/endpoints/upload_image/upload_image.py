@@ -1,8 +1,10 @@
 from flask_restful import Resource, reqparse,fields,marshal_with
 import base64
 from extensions import mongo
+
 from PIL import Image as Img
-class Image(Resource):
+image_id=None
+class ImageUpload(Resource):
 
     def post(self):
         try:
@@ -19,7 +21,7 @@ class Image(Resource):
             imagesCollection=mongo.db['images']
             print(fileName)
             if imagesCollection.count_documents({"name":fileName})==0:
-                imagesCollection.insert_one({"name":fileName,"tags":[],"title":""})
+               image_id= imagesCollection.insert_one({"name":fileName,"tags":[],"title":""})
             image_data = bytes(image_data, encoding="ascii")
 
             with open(f'./data/stored/{fileName}.png', 'wb') as fh:

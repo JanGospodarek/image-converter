@@ -173,6 +173,20 @@ const handleSubmitEdit = async () => {
     props.setError(submitError.value);
     return;
   }
+  console.log(new Array(...tags.value));
+
+  const res = await fetch("http://127.0.0.1:8000/upload_image/upload_info", {
+    method: "POST",
+    body: JSON.stringify({
+      id: store.state.id,
+      imageTitle: imageTitle.value,
+      tags: tags.value.join(","),
+    }),
+
+    headers: { "Content-Type": "application/json" },
+  });
+  const data = await res.json();
+  console.log(data);
 };
 const props = defineProps<{
   // handleNextStep: (nextStep: string) => void;

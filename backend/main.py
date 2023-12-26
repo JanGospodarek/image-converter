@@ -2,7 +2,8 @@
 from flask import Flask
 from flask_restful import Api
 from flask_cors import CORS
-from endpoints.upload_image import Image
+from endpoints.upload_image.upload_image import ImageUpload
+from endpoints.upload_image.upload_image_info import ImageInfoUpload
 from initiate import Initiate
 from extensions import mongo
 from endpoints.convert.convert_pixel_art import ConvertPixelArt
@@ -16,7 +17,8 @@ mongo.init_app(app)
 
 # routes
 api.add_resource(Initiate,'/init')
-api.add_resource(Image,'/upload_image')
+api.add_resource(ImageUpload,'/upload_image')
+api.add_resource(ImageInfoUpload,'/upload_image/upload_info')
 api.add_resource(ConvertPixelArt,'/convert')
 api.add_resource(SendImage,'/download_image')
 
