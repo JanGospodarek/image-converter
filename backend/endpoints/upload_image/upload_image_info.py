@@ -6,17 +6,23 @@ from endpoints.upload_image.upload_image import image_id
 class ImageInfoUpload(Resource):
 
     def post(self):
-        print('hej')
-        parse = reqparse.RequestParser()
-        parse.add_argument('imageTitle')
-        parse.add_argument('tags',action='append',type=str)
-        parse.add_argument('id')
-        args = parse.parse_args()
-        imagesCollection = mongo.db['images']
+        try:
+            print('hej')
+            parse = reqparse.RequestParser()
+            parse.add_argument('imageTitle')
+            parse.add_argument('tags',action='append',type=str)
+            parse.add_argument('id')
+            args = parse.parse_args()
+            imagesCollection = mongo.db['images']
 
-        post = imagesCollection.find_one({"name": args['id']})
-        post['title']=args['imageTitle']
-        post['tags']=args['tags']
-        imagesCollection.update_one({"name": args['id']}, {"$set": post},upsert=False)
+            post = imagesCollection.find_one({"name": args['id']})
+            post['title']=args['imageTitle']
+            post['tags']=args['tags']
+            imagesCollection.update_one({"name": args['id']}, {"$set": post},upsert=False)
 
-        print(args)
+            print(args)
+        except:
+            return {"message": "Wystąpił problem z przesyłem danych"}, 400
+        else:
+            return {"message": "Dane wysłane na serwer!" }, 200
+

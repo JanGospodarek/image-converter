@@ -79,6 +79,7 @@ import { ref, defineProps } from "vue";
 import { useStore } from "vuex";
 import { key } from "../../store";
 import { onMounted } from "vue";
+import { setErrorProps } from "../error/ErrorPropsTypes";
 const tagName = ref<string>("");
 const imageTitle = ref<string>("");
 const tagInputError = ref<boolean>(false);
@@ -86,7 +87,6 @@ const tags = ref<string[]>([]);
 const pixelsAmount = ref<number>(3);
 const store = useStore(key);
 const imgFilterSrc = ref<string>("");
-const submitError = ref<string | null>(null);
 
 onMounted(async () => {
   const res = await fetch("http://127.0.0.1:8000/download_image", {
@@ -117,17 +117,9 @@ const handleSetFilter = async (filterName: string) => {
     if (res.status == 200) {
       const imageBase64 = "data:image/png;base64," + data.imageData;
       imgFilterSrc.value = imageBase64;
-      // const res = await fetch("http://127.0.0.1:8000/download_image", {
-      //   method: "POST",
-      //   body: JSON.stringify({
-      //     image: store.state.id,
-      //   }),
-      //   headers: { "Content-Type": "application/json" },
-      // });
-      // const data = await res.json();
     }
   } catch (error) {
-    console.log(error);
+    props.setError("Wystąpił błąd podczas przetwarzania zdjęcia");
   }
 };
 
@@ -169,27 +161,32 @@ const handleTitleInputChange = () => {
 };
 const handleSubmitEdit = async () => {
   if (imageTitle.value === "") {
-    submitError.value = "Musisz podać tytuł";
-    props.setError(submitError.value);
+    props.setError("Musisz podać tytuł zdjęcia");
     return;
   }
-  console.log(new Array(...tags.value));
+  try {
+    const res = await fetch("http://127.0.0.1:8000/upload_image/upload_info", {
+      method: "POST",
+      body: JSON.stringify({
+        id: store.state.id,
+        imageTitle: imageTitle.value,
+        tags: tags.value.join(","),
+      }),
 
-  const res = await fetch("http://127.0.0.1:8000/upload_image/upload_info", {
-    method: "POST",
-    body: JSON.stringify({
-      id: store.state.id,
-      imageTitle: imageTitle.value,
-      tags: tags.value.join(","),
-    }),
-
-    headers: { "Content-Type": "application/json" },
-  });
-  const data = await res.json();
-  console.log(data);
+      headers: { "Content-Type": "application/json" },
+    });
+    const data = await res.json();
+    if (res.status == 200) {
+      console.log("ok!");
+    } else {
+      throw new Error(data.message);
+    }
+  } catch (error: any) {
+    props.setError(error.message);
+  }
 };
 const props = defineProps<{
   // handleNextStep: (nextStep: string) => void;
-  setError: (msg: string | null) => void;
+  setError: setErrorProps;
 }>();
 </script>

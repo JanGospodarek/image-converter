@@ -1,5 +1,6 @@
 <template>
   <div
+    v-if="errorMsg != null"
     className="alert alert-error absolute right-0 left-0 bottom-16 ml-auto mr-auto h-16  w-1/2"
   >
     <svg
@@ -20,8 +21,15 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, defineProps } from "vue";
-const props = defineProps<{
-  errorMsg: string | null;
-}>();
+import { ref, defineProps, onMounted, watchEffect } from "vue";
+import { ErrorProps } from "./ErrorPropsTypes";
+const errorMsg = ref<string | null>(null);
+watchEffect(() => {
+  if (props.errorMsg) {
+    errorMsg.value = props.errorMsg;
+  }
+});
+
+const props = defineProps<ErrorProps>();
 </script>
+./ErrorPropsTypes

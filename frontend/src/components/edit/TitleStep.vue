@@ -8,7 +8,7 @@
       :class="`btn  btn-outline mx-auto ${
         errorMsg ? 'btn-error' : 'btn-accent'
       }`"
-      :disabled="errorMsg != null"
+      :disabled="errorMsg"
       @click="props.handleNextStep('upload')"
     >
       Dalej
@@ -21,7 +21,8 @@
 import { defineProps, onMounted, ref } from "vue";
 import NextArrow from "../../assets/nextArrow.vue";
 import store from "../../store";
-const errorMsg = ref<string | null>(null);
+import { setErrorProps } from "../error/ErrorPropsTypes";
+const errorMsg = ref<boolean>(false);
 
 onMounted(async () => {
   try {
@@ -35,13 +36,13 @@ onMounted(async () => {
 
     if (res.status == 200) store.commit("setId", data.id);
   } catch (error) {
-    errorMsg.value = "";
+    errorMsg.value = true;
     props.setError("Błąd połączenia z serwerem");
   }
 });
 
 const props = defineProps<{
   handleNextStep: (nextStep: string) => void;
-  setError: (msg: string) => void;
+  setError: setErrorProps;
 }>();
 </script>

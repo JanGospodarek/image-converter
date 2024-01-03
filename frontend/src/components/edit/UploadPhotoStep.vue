@@ -87,7 +87,7 @@ const acceptableExts = ["png", "jpg", "jpeg"];
 
 const handleFileInputChange = (e: Event) => {
   if (!file.value?.files) return;
-
+  if (file.value.files[0] == undefined) return;
   const ext = file.value.files[0].name.split(".").pop() as string;
 
   if (!acceptableExts.includes(ext)) {
